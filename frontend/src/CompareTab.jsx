@@ -2,44 +2,17 @@ import { useState, useEffect } from 'react';
 import { API_URL } from './App.jsx';
 import { Token } from './Token.jsx';
 
-const PRESETS = [
-  {
-    name: 'apache',
-    label: 'Apache log line',
-    text: '192.168.1.42 - - [25/Mar/2024:10:30:15] "GET /api/users/42 HTTP/1.1" 200 1842',
-  },
-  {
-    name: 'stack',
-    label: 'Stack trace',
-    text: 'Traceback (most recent call last):\n  File "app.py", line 42, in handle_request\n    user = db.query(User).filter_by(id=user_id).one()\nsqlalchemy.exc.NoResultFound: No row was found',
-  },
-  {
-    name: 'json',
-    label: 'JSON log',
-    text: '{"ts":"2024-03-25T10:30:15Z","level":"error","msg":"upstream timeout","service":"api-gateway","duration_ms":5023}',
-  },
-  {
-    name: 'prose',
-    label: 'Plain prose',
-    text: 'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.',
-  },
-];
+const DEFAULT_INPUT = '192.168.1.42 - - [25/Mar/2024:10:30:15] "GET /api/users/42 HTTP/1.1" 200 1842';
 
 // GPT-4o input pricing: $2.50 per 1M tokens
 const GPT4O_PRICE_PER_M = 2.50;
 const DEMO_DAILY_VOLUME = 1_000_000;
 
 export default function CompareTab({ bpeTokenizerId }) {
-  const [activePreset, setActivePreset] = useState('apache');
-  const [text, setText] = useState(PRESETS[0].text);
+  const [text, setText] = useState(DEFAULT_INPUT);
   const [bpeResult, setBpeResult] = useState(null);
   const [gpt4Result, setGpt4Result] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  function handlePreset(preset) {
-    setActivePreset(preset.name);
-    setText(preset.text);
-  }
 
   useEffect(() => {
     if (!text || !bpeTokenizerId) return;
@@ -98,28 +71,16 @@ export default function CompareTab({ bpeTokenizerId }) {
           <span className="section-label">Test input</span>
           <span className="panel-meta">{text.length} chars</span>
         </div>
-        <div className="chip-row" style={{ marginBottom: 12 }}>
-          {PRESETS.map(p => (
-            <button
-              key={p.name}
-              className={`chip-btn ${activePreset === p.name ? 'active' : ''}`}
-              onClick={() => handlePreset(p)}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
         <textarea
           value={text}
-          onChange={(e) => { setText(e.target.value); setActivePreset(null); }}
-          placeholder="Paste any text to tokenize…"
+          onChange={(e) => setText(e.target.value)}
           rows={3}
         />
       </div>
 
       <div className="compare-grid">
         <Column
-          title="Your BPE"
+          title="BPE"
           subtitle="trained on apache logs · from scratch"
           result={bpeResult}
           loading={loading}

@@ -47,7 +47,7 @@ def pretrain():
     if os.path.exists(apache_path):
         with open(apache_path) as f:
             corpus = f.read()
-        result = bpe.train(corpus, vocab_size=500)
+        result = bpe.train(corpus, vocab_size=2000)
         trained_tokenizers["apache-bpe-default"] = result
         print(f"[startup] Pre-trained Apache BPE: {len(result['vocab'])} tokens")
     else:
@@ -60,7 +60,7 @@ def pretrain():
 
 class TrainRequest(BaseModel):
     corpus_name: str
-    vocab_size: int = 500
+    vocab_size: int = 2000
 
 class TokenizeRequest(BaseModel):
     tokenizer_id: str
@@ -113,10 +113,21 @@ def train(req: TrainRequest):
     trained_tokenizers[tokenizer_id] = result
 
     # Build a sample of the vocab to show in the UI
+    real_tokens = [t for t in result["vocab"].keys() if not t.startswith("[")]
     vocab_sample = sorted(
-        [t for t in result["vocab"].keys() if len(t) > 1 and not t.startswith("[")],
+        [t for t in real_tokens if len(t) > 1],
         key=lambda x: -len(x),
     )[:80]
+
+    # Stats about the learned vocab
+    longest = max(real_tokens, key=len)
+    avg_len = round(sum(len(t) for t in real_tokens) / len(real_tokens), 2)
+    length_distribution = {}
+    for t in real_tokens:
+        bucket = str(len(t)) if len(t) < 6 else "6+"
+        length_distribution[bucket] = length_distribution.get(bucket, 0) + 1
+    first_merge = list(result["merges"][0]) if result["merges"] else None
+    last_merge = list(result["merges"][-1]) if result["merges"] else None
 
     return {
         "tokenizer_id": tokenizer_id,
@@ -124,6 +135,13 @@ def train(req: TrainRequest):
         "vocab_size": len(result["vocab"]),
         "vocab_sample": vocab_sample,
         "corpus_chars": len(corpus),
+        "stats": {
+            "longest_token": longest,
+            "avg_token_length": avg_len,
+            "length_distribution": length_distribution,
+            "first_merge": first_merge,
+            "last_merge": last_merge,
+        },
     }
 
 

@@ -5,12 +5,11 @@ import { Token } from './Token.jsx';
 const CORPORA = [
   { name: 'apache', label: 'Apache logs', desc: 'web server access logs' },
   { name: 'linux', label: 'Linux syslog', desc: 'kernel + system messages' },
-  { name: 'openssh', label: 'OpenSSH logs', desc: 'auth + session logs' },
 ];
 
 export default function TrainTab({ onTokenizerTrained }) {
   const [corpusName, setCorpusName] = useState('apache');
-  const [vocabSize, setVocabSize] = useState(500);
+  const [vocabSize, setVocabSize] = useState(2000);
   const [isTraining, setIsTraining] = useState(false);
   const [visibleMerges, setVisibleMerges] = useState([]);
   const [vocabSample, setVocabSample] = useState([]);
@@ -57,6 +56,7 @@ export default function TrainTab({ onTokenizerTrained }) {
             vocab_size: data.vocab_size,
             merges: data.merges.length,
             corpus_chars: data.corpus_chars,
+            details: data.stats,
           });
           clearInterval(animationRef.current);
           animationRef.current = null;
@@ -104,8 +104,8 @@ export default function TrainTab({ onTokenizerTrained }) {
           <input
             type="range"
             min={100}
-            max={1000}
-            step={50}
+            max={3000}
+            step={100}
             value={vocabSize}
             onChange={(e) => setVocabSize(parseInt(e.target.value))}
             className="range"
@@ -155,7 +155,7 @@ export default function TrainTab({ onTokenizerTrained }) {
 
         <div className="panel">
           <div className="panel-header">
-            <span className="panel-title">Learned vocab (sample)</span>
+            <span className="panel-title">Learned vocab</span>
             <span className="panel-meta">
               {vocabSample.length > 0 ? `top ${vocabSample.length}` : '—'}
             </span>
@@ -189,6 +189,51 @@ export default function TrainTab({ onTokenizerTrained }) {
           <div className="stat" style={{ marginLeft: 'auto' }}>
             <span className="stat-label">ready</span>
             <span className="stat-value accent">→ compare tab</span>
+          </div>
+        </div>
+      )}
+
+      {stats?.details && (
+        <div className="panel" style={{ marginTop: 16 }}>
+          <div className="panel-header">
+            <span className="panel-title">Vocab anatomy</span>
+          </div>
+          <div style={{ padding: '16px 20px', fontFamily: 'var(--font-mono)', fontSize: 13, lineHeight: 1.9, color: 'var(--text-secondary)' }}>
+            <div>
+              longest token: <span style={{ color: 'var(--accent)' }}>{stats.details.longest_token}</span>
+              <span style={{ color: 'var(--text-tertiary)' }}> ({stats.details.longest_token.length} chars)</span>
+            </div>
+            <div>
+              avg token length: <span style={{ color: 'var(--text-primary)' }}>{stats.details.avg_token_length}</span> chars
+            </div>
+            {stats.details.first_merge && (
+              <div>
+                first merge: <span style={{ color: 'var(--text-primary)' }}>
+                  '{stats.details.first_merge[0]}' + '{stats.details.first_merge[1]}' → '{stats.details.first_merge[0] + stats.details.first_merge[1]}'
+                </span>
+              </div>
+            )}
+            {stats.details.last_merge && (
+              <div>
+                last merge: <span style={{ color: 'var(--text-primary)' }}>
+                  '{stats.details.last_merge[0]}' + '{stats.details.last_merge[1]}' → '{stats.details.last_merge[0] + stats.details.last_merge[1]}'
+                </span>
+              </div>
+            )}
+            <div style={{ marginTop: 8 }}>token length breakdown:</div>
+            <div style={{ display: 'flex', gap: 18, marginLeft: 12, flexWrap: 'wrap' }}>
+              {Object.entries(stats.details.length_distribution)
+                .sort((a, b) => {
+                  const aN = a[0] === '6+' ? 99 : +a[0];
+                  const bN = b[0] === '6+' ? 99 : +b[0];
+                  return aN - bN;
+                })
+                .map(([len, count]) => (
+                  <span key={len}>
+                    {len} char: <span style={{ color: 'var(--text-primary)' }}>{count}</span>
+                  </span>
+                ))}
+            </div>
           </div>
         </div>
       )}

@@ -17,9 +17,6 @@ curl -sSL -o corpora/apache.txt https://raw.githubusercontent.com/logpai/loghub/
 echo "▸ downloading Linux logs…"
 curl -sSL -o corpora/linux.txt https://raw.githubusercontent.com/logpai/loghub/master/Linux/Linux_2k.log
 
-echo "▸ downloading OpenSSH logs…"
-curl -sSL -o corpora/openssh.txt https://raw.githubusercontent.com/logpai/loghub/master/OpenSSH/SSH_2k.log
-
 echo ""
 echo "✓ Backend setup complete."
 echo ""

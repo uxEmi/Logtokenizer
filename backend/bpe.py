@@ -100,11 +100,3 @@ def decode(token_ids, vocab):
     return "".join(id_to_token.get(i, "") for i in token_ids)
 
 
-if __name__ == "__main__":
-    sample = (
-        '192.168.1.42 - - [25/Mar/2024:10:30:15] "GET /api/users HTTP/1.1" 200 1842\n'
-        '10.0.0.7 - - [25/Mar/2024:10:30:16] "POST /api/login HTTP/1.1" 401 89\n'
-    ) * 30
-    result = train(sample, vocab_size=120)
-    print(f"Vocab size: {len(result['vocab'])}")
-    print(f"First 10 merges: {result['merges'][:10]}")

@@ -18,7 +18,7 @@ This project quantifies that, visually and in dollars.
 
 - **Backend**: FastAPI · BPE from scratch (~100 lines of Python) · tiktoken for the GPT-4 reference
 - **Frontend**: React · Vite · vanilla CSS · IBM Plex Mono/Sans
-- **Data**: Apache, Linux, and OpenSSH logs from [Loghub](https://github.com/logpai/loghub) — free, academic, real
+- **Data**: Apache and Linux logs from [Loghub](https://github.com/logpai/loghub) — free, academic, real
 
 Everything runs offline. No API keys, no GPU, no external services.
 
@@ -30,7 +30,7 @@ Everything runs offline. No API keys, no GPU, no external services.
 ./setup.sh
 ```
 
-This creates the Python venv, installs dependencies, and downloads three real log corpora.
+This creates the Python venv, installs dependencies, and downloads two real log corpora.
 
 ### Manual setup
 
@@ -45,7 +45,6 @@ pip install -r requirements.txt
 mkdir -p corpora
 curl -o corpora/apache.txt   https://raw.githubusercontent.com/logpai/loghub/master/Apache/Apache_2k.log
 curl -o corpora/linux.txt    https://raw.githubusercontent.com/logpai/loghub/master/Linux/Linux_2k.log
-curl -o corpora/openssh.txt  https://raw.githubusercontent.com/logpai/loghub/master/OpenSSH/SSH_2k.log
 
 # Frontend
 cd ../frontend

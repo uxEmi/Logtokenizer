@@ -27,17 +27,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <span className="brand-mark" />
           <span>LOGTOKENIZER</span>
-          <span className="brand-slash">/</span>
-          <span className="brand-sub">bpe from scratch</span>
-        </div>
-        <div className="header-meta">
-          <span>
-            <span className={`status-dot ${backendOk ? '' : 'dim'}`} />
-            {backendOk ? 'backend online' : 'backend offline'}
-          </span>
-          <span>v0.1</span>
         </div>
       </header>
 
@@ -46,14 +36,12 @@ export default function App() {
           className={`tab ${activeTab === 'train' ? 'active' : ''}`}
           onClick={() => setActiveTab('train')}
         >
-          <span className="tab-num">01</span>
           <span>Train</span>
         </button>
         <button
           className={`tab ${activeTab === 'compare' ? 'active' : ''}`}
           onClick={() => setActiveTab('compare')}
         >
-          <span className="tab-num">02</span>
           <span>Compare</span>
         </button>
       </nav>
@@ -67,10 +55,6 @@ export default function App() {
         )}
       </main>
 
-      <footer className="footer">
-        <span>BPE · WordPiece · tiktoken</span>
-        <span>tokenizers learn what you train them on</span>
-      </footer>
     </div>
   );
 }
