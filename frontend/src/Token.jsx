@@ -9,8 +9,8 @@ export function tokenColor(text) {
   }
   const hue = Math.abs(hash) % 360;
   return {
-    bg: `hsl(${hue}, 70%, 18%)`,
-    fg: `hsl(${hue}, 80%, 72%)`,
+    bg: `hsl(${hue}, 35%, 15%)`,
+    fg: `hsl(${hue}, 50%, 72%)`,
   };
 }
 

@@ -83,9 +83,10 @@ body::after {
   align-items: center;
   gap: 10px;
   font-family: var(--font-mono);
-  font-size: 32px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--text-primary);
 }
 
 .brand-mark {
@@ -203,7 +204,9 @@ body::after {
 .panel {
   background: var(--bg-elev-1);
   border: 1px solid var(--border);
-  padding: 18px;
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 4px 16px rgba(0,0,0,0.25);
 }
 
 .panel-header {
@@ -238,10 +241,11 @@ body::after {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 9px 18px;
   background: var(--bg-elev-2);
   color: var(--text-primary);
   border: 1px solid var(--border-strong);
+  border-radius: 6px;
   cursor: pointer;
   letter-spacing: 0.03em;
   transition: all 0.15s ease;
@@ -268,8 +272,8 @@ body::after {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #c8ff75;
-  border-color: #c8ff75;
+  background: #88dfff;
+  border-color: #88dfff;
 }
 
 .btn-primary:disabled {
@@ -285,6 +289,7 @@ body::after {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border);
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   letter-spacing: 0.02em;
@@ -361,6 +366,7 @@ textarea {
   background: var(--bg-elev-1);
   color: var(--text-primary);
   border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 14px 16px;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -394,10 +400,12 @@ textarea::placeholder { color: var(--text-tertiary); }
   flex-wrap: wrap;
   gap: 20px;
   align-items: center;
-  padding: 16px 20px;
+  padding: 18px 22px;
   background: var(--bg-elev-1);
   border: 1px solid var(--border);
+  border-radius: 8px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 4px 16px rgba(0,0,0,0.25);
 }
 
 /* ============================================================
@@ -480,7 +488,7 @@ textarea::placeholder { color: var(--text-tertiary); }
   font-size: 11px;
   padding: 2px 6px;
   margin: 0 1px;
-  border-radius: 2px;
+  border-radius: 3px;
   line-height: 1.4;
   white-space: pre;
 }
