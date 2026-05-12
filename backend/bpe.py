@@ -1,12 +1,3 @@
-"""
-BPE (Byte-Pair Encoding) tokenizer — from scratch.
-
-Three public functions:
-    train(corpus, vocab_size) -> dict with {"vocab": ..., "merges": ...}
-    encode(text, vocab, merges) -> list[int]
-    decode(ids, vocab) -> str
-"""
-
 import re
 from collections import Counter
 
@@ -57,7 +48,7 @@ def train(corpus, vocab_size=500):
     vocab = set()
     for split in word_splits:
         vocab.update(split)
-
+    
     merges = []
     while len(vocab) < vocab_size:
         pair_counts = _count_pairs(word_splits)

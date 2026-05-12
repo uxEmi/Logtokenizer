@@ -1,17 +1,3 @@
-"""
-LogTokenizer backend — FastAPI server.
-
-Run with:
-    uvicorn main:app --reload
-
-Endpoints:
-    GET  /                  — health check
-    GET  /corpora           — list available corpora
-    POST /train             — train a custom BPE tokenizer
-    POST /tokenize          — tokenize text with a trained tokenizer
-    POST /tokenize/gpt4     — tokenize text with GPT-4's tokenizer
-"""
-
 import os
 import uuid
 from typing import Optional
@@ -36,9 +22,7 @@ gpt4_encoding = tiktoken.get_encoding("cl100k_base")
 CORPORA_DIR = os.path.join(os.path.dirname(__file__), "corpora")
 
 
-# ---------------------------------------------------------------------------
 # Pre-train at startup so the Compare tab works instantly
-# ---------------------------------------------------------------------------
 
 @app.on_event("startup")
 def pretrain():
@@ -54,9 +38,7 @@ def pretrain():
         print(f"[startup] WARNING: {apache_path} not found — Train tab will fail until you download the corpus")
 
 
-# ---------------------------------------------------------------------------
 # Models
-# ---------------------------------------------------------------------------
 
 class TrainRequest(BaseModel):
     corpus_name: str
@@ -70,9 +52,7 @@ class Gpt4TokenizeRequest(BaseModel):
     text: str
 
 
-# ---------------------------------------------------------------------------
 # Endpoints
-# ---------------------------------------------------------------------------
 
 @app.get("/")
 def health():
