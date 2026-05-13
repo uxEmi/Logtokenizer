@@ -6,12 +6,10 @@ _WORD_RE = re.compile(r"\w+|\S")
 
 
 def pre_tokenize(text):
-    """Split text into word-like chunks so merges happen within words."""
     return _WORD_RE.findall(text)
 
 
 def _count_pairs(word_splits):
-    """Count every adjacent pair across all words, weighted by word frequency."""
     pairs = Counter()
     for split, freq in word_splits.items():
         for i in range(len(split) - 1):
@@ -20,7 +18,6 @@ def _count_pairs(word_splits):
 
 
 def _apply_merge(word_splits, pair):
-    """Replace every occurrence of `pair` with the merged token."""
     left, right = pair
     merged = left + right
     new_splits = {}
@@ -40,7 +37,6 @@ def _apply_merge(word_splits, pair):
 
 
 def train(corpus, vocab_size=500):
-    """Train a BPE tokenizer. Returns {'vocab': dict, 'merges': list}."""
     words = pre_tokenize(corpus)
     word_freqs = Counter(words)
     word_splits = {tuple(word): freq for word, freq in word_freqs.items()}
@@ -65,7 +61,6 @@ def train(corpus, vocab_size=500):
 
 
 def encode(text, vocab, merges):
-    """Encode new text into token IDs by replaying the learned merges."""
     token_ids = []
     for word in pre_tokenize(text):
         tokens = list(word)
@@ -86,7 +81,6 @@ def encode(text, vocab, merges):
 
 
 def decode(token_ids, vocab):
-    """Decode token IDs back into a string."""
     id_to_token = {i: tok for tok, i in vocab.items()}
     return "".join(id_to_token.get(i, "") for i in token_ids)
 

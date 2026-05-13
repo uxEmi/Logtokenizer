@@ -2,20 +2,19 @@ import { useState, useEffect } from 'react';
 import { API_URL } from './App.jsx';
 import { Token } from './Token.jsx';
 
-const DEFAULT_INPUT = '192.168.1.42 - - [25/Mar/2024:10:30:15] "GET /api/users/42 HTTP/1.1" 200 1842';
+const PLACEHOLDER = `Paste a log line — for example:
 
-// GPT-4o input pricing: $2.50 per 1M tokens
-const GPT4O_PRICE_PER_M = 2.50;
-const DEMO_DAILY_VOLUME = 1_000_000;
+Apache: 192.168.1.42 - - [25/Mar/2024:10:30:15] "GET /api/users/42 HTTP/1.1" 200 1842
+Linux:  Jun 14 15:16:01 combo sshd(pam_unix)[19939]: authentication failure`;
 
-export default function CompareTab({ bpeTokenizerId }) {
-  const [text, setText] = useState(DEFAULT_INPUT);
+export default function CompareTab({ hasTokenizer }) {
+  const [text, setText] = useState('');
   const [bpeResult, setBpeResult] = useState(null);
   const [gpt4Result, setGpt4Result] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!text || !bpeTokenizerId) return;
+    if (!text || !hasTokenizer) return;
 
     setLoading(true);
     const timer = setTimeout(async () => {
@@ -24,7 +23,7 @@ export default function CompareTab({ bpeTokenizerId }) {
           fetch(`${API_URL}/tokenize`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tokenizer_id: bpeTokenizerId, text }),
+            body: JSON.stringify({ text }),
           }).then(r => r.json()),
           fetch(`${API_URL}/tokenize/gpt4`, {
             method: 'POST',
@@ -42,9 +41,9 @@ export default function CompareTab({ bpeTokenizerId }) {
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [text, bpeTokenizerId]);
+  }, [text, hasTokenizer]);
 
-  if (!bpeTokenizerId) {
+  if (!hasTokenizer) {
     return (
       <div className="panel" style={{ padding: 32, textAlign: 'center' }}>
         <div className="section-label" style={{ justifyContent: 'center', marginBottom: 12 }}>No tokenizer trained</div>
@@ -60,10 +59,6 @@ export default function CompareTab({ bpeTokenizerId }) {
   const gpt4Count = gpt4Result?.count;
   const bpeWins = bpeCount != null && gpt4Count != null && bpeCount < gpt4Count;
 
-  const tokensSaved = (gpt4Count ?? 0) - (bpeCount ?? 0);
-  const pctReduction = gpt4Count ? ((tokensSaved / gpt4Count) * 100) : 0;
-  const monthlySavings = (tokensSaved * DEMO_DAILY_VOLUME * 30 / 1_000_000) * GPT4O_PRICE_PER_M;
-
   return (
     <>
       <div className="input-block">
@@ -74,14 +69,15 @@ export default function CompareTab({ bpeTokenizerId }) {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          rows={3}
+          placeholder={PLACEHOLDER}
+          rows={5}
         />
       </div>
 
       <div className="compare-grid">
         <Column
           title="BPE"
-          subtitle="trained on apache logs · from scratch"
+          subtitle="trained on apache logs"
           result={bpeResult}
           loading={loading}
           win={bpeWins}
@@ -89,7 +85,7 @@ export default function CompareTab({ bpeTokenizerId }) {
         />
         <Column
           title="GPT-4 · tiktoken"
-          subtitle="cl100k_base · general-purpose"
+          subtitle="cl100k_base"
           result={gpt4Result}
           loading={loading}
           win={!bpeWins && bpeResult && gpt4Result}
@@ -97,16 +93,6 @@ export default function CompareTab({ bpeTokenizerId }) {
         />
       </div>
 
-      {bpeResult && gpt4Result && (
-        <CostPanel
-          bpeCount={bpeCount}
-          gpt4Count={gpt4Count}
-          tokensSaved={tokensSaved}
-          pctReduction={pctReduction}
-          monthlySavings={monthlySavings}
-          bpeWins={bpeWins}
-        />
-      )}
     </>
   );
 }
@@ -136,46 +122,3 @@ function Column({ title, subtitle, result, loading, win, lose }) {
   );
 }
 
-function CostPanel({ bpeCount, gpt4Count, tokensSaved, pctReduction, monthlySavings, bpeWins }) {
-  if (bpeWins) {
-    return (
-      <div className="cost-panel">
-        <div className="cost-header">
-          <span>◆</span>
-          <span>Cost impact · domain-trained BPE wins</span>
-        </div>
-        <div className="cost-headline">
-          Your BPE saves <span className="cost-big">{tokensSaved} tokens</span>{' '}
-          ({pctReduction.toFixed(0)}%) vs GPT-4 on this input.
-        </div>
-        <div className="cost-row">
-          At GPT-4o input pricing (${GPT4O_PRICE_PER_M.toFixed(2)} / 1M tok) × 1M log lines/day:
-        </div>
-        <div className="cost-row">
-          <span className="cost-big" style={{ fontSize: 16 }}>
-            ≈ ${monthlySavings.toFixed(0)} / month
-          </span>
-          <span className="cost-secondary">in tokenization savings</span>
-        </div>
-      </div>
-    );
-  }
-
-  // GPT-4 wins on this input — the honest moment
-  const gpt4Saves = bpeCount - gpt4Count;
-  return (
-    <div className="cost-panel" style={{ borderLeftColor: 'var(--amber)' }}>
-      <div className="cost-header" style={{ color: 'var(--amber)' }}>
-        <span>◇</span>
-        <span>The honest tradeoff · GPT-4 wins here</span>
-      </div>
-      <div className="cost-headline">
-        On this input, GPT-4 uses <span style={{ color: 'var(--amber)', fontWeight: 600 }}>{gpt4Saves} fewer tokens</span> than our BPE.
-      </div>
-      <div className="cost-row cost-secondary">
-        Our BPE was trained on logs — it's specialized, not universal.
-        Tokenizers are shaped by their training data: pick yours to match your domain.
-      </div>
-    </div>
-  );
-}

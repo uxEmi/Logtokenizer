@@ -38,7 +38,7 @@ export default function TrainTab({ onTokenizerTrained }) {
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
 
-      onTokenizerTrained(data.tokenizer_id);
+      onTokenizerTrained();
 
       // Animate the merges streaming in
       const allMerges = data.merges;
