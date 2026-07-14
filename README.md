@@ -1,36 +1,38 @@
 # LogTokenizer
 
-> A demonstration that **tokenizers are shaped by their training data** — implement BPE from scratch, train it on real Apache logs, and watch it beat GPT-4's tokenizer on log data.
+By **Emi, Mihai and Ayla**.
 
-## What it shows
+A project about how tokenizers depend on the data they are trained on. We built a BPE (Byte Pair Encoding) tokenizer from scratch, trained it on real server logs, and compared it against GPT-4's tokenizer to show that a tokenizer trained on logs uses fewer tokens on log data.
 
-When you feed logs into an LLM (for analysis, anomaly detection, on-call assistance), every token costs money. **A tokenizer trained on logs encodes log data using fewer tokens than a general-purpose tokenizer like GPT-4's** — because it learned domain patterns (`GET`, `HTTP`, `200`, `/api/`) as single tokens.
+## The idea
 
-This project quantifies that, visually and in dollars.
+When you send text to a large language model, it gets split into tokens, and you pay per token. General-purpose tokenizers like GPT-4's are trained on normal text, so they are not great at log data. If you train a tokenizer directly on logs, it learns common log pieces (like `GET`, `HTTP`, `200`, `/api/`) as single tokens, so the same log line takes fewer tokens.
+
+We wanted to actually see this happen, so the app has two parts.
 
 ## The two features
 
-**01 · Train** — pick a log corpus, choose a vocab size, and watch a BPE algorithm build its vocabulary in real time. Merges stream in (`G + E → GE`, `GE + T → GET`, eventually `HTTP`, `200`, `/api/`) with the growing vocabulary panel beside it.
+**Train** — you pick a log corpus and a vocabulary size, press Train, and watch the BPE algorithm build its vocabulary. The merges show up one by one (for example `G + E → GE`, then `GE + T → GET`) next to the growing list of tokens.
 
-**02 · Compare** — paste a log line and see it tokenized side-by-side by your trained BPE vs GPT-4's tokenizer (via `tiktoken`). Token counts, colored chips for visual diff, plus a cost panel that translates the difference into dollars per month at production log volumes.
+**Compare** — you paste a log line and it gets tokenized two ways at once: by our trained BPE and by GPT-4's tokenizer (using the `tiktoken` library). You can see both token counts and a colored view of how each one splits the text, plus a small panel that turns the difference into an estimated monthly cost.
 
-## Stack
+## Tech we used
 
-- **Backend**: FastAPI · BPE from scratch (~100 lines of Python) · tiktoken for the GPT-4 reference
-- **Frontend**: React · Vite · vanilla CSS · IBM Plex Mono/Sans
-- **Data**: Apache and Linux logs from [Loghub](https://github.com/logpai/loghub) — free, academic, real
+- **Backend**: Python with FastAPI. The BPE algorithm is written by hand. We use `tiktoken` for the GPT-4 tokenizer.
+- **Frontend**: React with Vite and plain CSS.
+- **Data**: Apache and Linux log samples from [Loghub](https://github.com/logpai/loghub), which are free and real.
 
-Everything runs offline. No API keys, no GPU, no external services.
+It all runs locally. No API keys and no GPU needed.
 
-## Quick start
+## How to run it
 
-### One-shot setup (Mac/Linux)
+### Quick setup (Mac/Linux)
 
 ```bash
 ./setup.sh
 ```
 
-This creates the Python venv, installs dependencies, and downloads two real log corpora.
+This makes the Python virtual environment, installs the dependencies, and downloads the two log files.
 
 ### Manual setup
 
@@ -41,7 +43,7 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Download corpora
+# Download the log files
 mkdir -p corpora
 curl -o corpora/apache.txt   https://raw.githubusercontent.com/logpai/loghub/master/Apache/Apache_2k.log
 curl -o corpora/linux.txt    https://raw.githubusercontent.com/logpai/loghub/master/Linux/Linux_2k.log
@@ -51,7 +53,7 @@ cd ../frontend
 npm install
 ```
 
-### Run
+### Start it
 
 ```bash
 # Terminal 1
@@ -61,46 +63,40 @@ cd backend && source venv/bin/activate && uvicorn main:app --reload
 cd frontend && npm run dev
 ```
 
-Open <http://localhost:5173>. The backend pre-trains a BPE on Apache logs at startup, so the Compare tab works immediately — no need to wait.
+Then open <http://localhost:5173>. The backend trains a BPE on the Apache logs when it starts, so the Compare tab works right away.
 
-## API
+## API endpoints
 
-| Endpoint | Purpose |
+| Endpoint | What it does |
 |---|---|
-| `GET /` | health check, lists available trained tokenizers |
-| `GET /corpora` | list available corpora |
-| `POST /train` | train a BPE on a corpus, returns `tokenizer_id` + merges |
-| `POST /tokenize` | tokenize text with a trained tokenizer |
-| `POST /tokenize/gpt4` | tokenize text with GPT-4's tokenizer |
-
-## Demo flow (90 seconds)
-
-1. **Train tab.** Pick Apache logs, vocab 500, press Train. Watch tokens like `GET`, `HTTP`, `200`, `/api/` emerge as the algorithm learns them.
-2. **Compare tab.** Click the *Apache log line* preset. Your BPE: ~18 tokens. GPT-4: ~31. Point at the cost panel: ≈ $1,200/month at 1M log lines/day.
-3. **Plain prose preset.** Now GPT-4 wins. Tokenizers are domain-specific — pick yours to match your data.
+| `GET /` | health check, lists the trained tokenizers |
+| `GET /corpora` | lists the available log corpora |
+| `POST /train` | trains a BPE on a corpus, returns the id and the merges |
+| `POST /tokenize` | tokenizes text with a trained tokenizer |
+| `POST /tokenize/gpt4` | tokenizes text with GPT-4's tokenizer |
 
 ## Folder structure
 
 ```
 logtokenizer/
 ├── backend/
-│   ├── corpora/          # log datasets from Loghub
-│   ├── bpe.py            # BPE algorithm — train, encode, decode
+│   ├── corpora/          # the log datasets
+│   ├── bpe.py            # our BPE algorithm (train, encode, decode)
 │   ├── main.py           # FastAPI server
 │   └── requirements.txt
 ├── frontend/
 │   └── src/
-│       ├── App.jsx       # shell + tab switcher
-│       ├── TrainTab.jsx  # feature 1
-│       ├── CompareTab.jsx # feature 2
-│       ├── Token.jsx     # shared token chip component
+│       ├── App.jsx       # main app + tab switching
+│       ├── TrainTab.jsx  # the Train feature
+│       ├── CompareTab.jsx # the Compare feature
+│       ├── Token.jsx     # small token chip component
 │       └── styles.css
-├── setup.sh              # one-shot bootstrap
+├── setup.sh              # setup script
 └── README.md
 ```
 
-## Credits
+## Credits and sources
 
-- BPE algorithm: Sennrich et al. (2016), originally from Gage's 1994 compression scheme.
+- BPE algorithm: Sennrich et al. (2016), based on Gage's 1994 compression idea.
 - Log datasets: [Loghub](https://github.com/logpai/loghub) (LogPai).
 - GPT-4 tokenizer: OpenAI [`tiktoken`](https://github.com/openai/tiktoken).
