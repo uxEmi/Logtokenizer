@@ -1,6 +1,6 @@
 # LogTokenizer
 
-By **Emi, Mihai and Ayla**.
+By **Mihai and Ayla**.
 
 A project about how tokenizers depend on the data they are trained on. We built a BPE (Byte Pair Encoding) tokenizer from scratch, trained it on real server logs, and compared it against GPT-4's tokenizer to show that a tokenizer trained on logs uses fewer tokens on log data.
 
